@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neitek", "Neitek\Neitek.csproj", "{D07C8BFF-01C0-4EC1-8A89-3F0D1BBC414C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeitekWS", "NeitekWS\NeitekWS.csproj", "{59F1340F-79AF-4381-89B8-B6E3A66E8DED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D07C8BFF-01C0-4EC1-8A89-3F0D1BBC414C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D07C8BFF-01C0-4EC1-8A89-3F0D1BBC414C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D07C8BFF-01C0-4EC1-8A89-3F0D1BBC414C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D07C8BFF-01C0-4EC1-8A89-3F0D1BBC414C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59F1340F-79AF-4381-89B8-B6E3A66E8DED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59F1340F-79AF-4381-89B8-B6E3A66E8DED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59F1340F-79AF-4381-89B8-B6E3A66E8DED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59F1340F-79AF-4381-89B8-B6E3A66E8DED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BED197CF-047C-4E0B-A590-4A571BAC15C1}
+	EndGlobalSection
+EndGlobal

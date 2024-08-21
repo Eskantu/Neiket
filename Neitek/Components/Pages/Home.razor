@@ -1,0 +1,92 @@
+﻿@page "/"
+
+<style>
+    .c {
+        background-color: white;
+    }
+
+    .btnColor {
+        background-color: #336666;
+        color: white;
+    }
+
+    progress-bar {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    progress-bar-fill {
+        height: 24px;
+        background-color: #4caf50;
+        transition: width 0.4s ease;
+    }
+
+</style>
+
+<PageTitle>Home</PageTitle>
+
+<div class="row">
+    <div class="top-row c mt-2 mb-2">
+        <h4>
+            <strong>Control metas</strong>
+        </h4>
+    </div>
+    <article class="content col col-4 c mr">
+        <button class="btn btnColor mb-4">Nueva tarea</button>
+        <ul>
+            @foreach (var item in MetasList)
+            {
+                <li class="mb-4">
+                    <div class="row">
+                        <div class="col col-5">@item.Name</div>
+                        <div class="col col-7">
+                            <button>Edit</button>
+                            <button>Delete</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        @item.FechaCreacion.ToShortDateString()
+                    </div>
+                    <div class="row">
+                        Tareas completadas @item.TareasCompletadas / @item.TotalTareas
+                    </div>
+                    <progress value="50" max="100" style="--value: 25; --max: 100;" />
+                </li>
+            }
+        </ul>
+    </article>
+    <article class="col col-1"></article>
+    <article class="content px-4 col col-7 ml c">
+        <div class="row">
+            <div class="col col-3">
+                <button class="btn btnColor">Agreagar tarea</button>
+            </div>
+        </div>
+
+    </article>
+</div>
+@code {
+    private List<Metas>? MetasList;
+
+    public class Metas
+    {
+        public string Name { get; set; }
+        public DateTime FechaCreacion { get; set; }
+        public int TotalTareas { get; set; }
+        public int TareasCompletadas { get; set; }
+        public decimal Porcentaje { get => Math.Round((decimal)TotalTareas / (decimal)TareasCompletadas); }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        MetasList = new List<Metas>();
+        for (int i = 1; i < 20; i++)
+        {
+            MetasList.Add(new Metas { Name = $"Meta {i + 1}", FechaCreacion = DateTime.Now.AddDays(i + 1), TotalTareas = (i + 1) * 100, TareasCompletadas = (i + 1) * 100 / i + 1 });
+        }
+    }
+
+
+}
