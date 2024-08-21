@@ -4,8 +4,8 @@ Esta prueba tecnica se realizo con tecnologias .Net, EF Core, HTML, CSS y Bootst
 
 #Pasos para levantar proyecto
 
-1.- Ejecutar script en MSSQLServer
-2.- De ser necesario cambiar la cadena de conexión eb el proyecto backEnd en appsetting
-3.- Levantar el proyecto backend
-4.- De ser necesario cambiar los enlaces de conexion en el proyecto frontEnd en appsettings
-5.- levantar el proyecto front
+- Ejecutar script en MSSQLServer
+  - De ser necesario cambiar la cadena de conexión eb el proyecto backEnd en appsetting
+  - Levantar el proyecto backend
+  - De ser necesario cambiar los enlaces de conexion en el proyecto frontEnd en appsettings
+  - levantar el proyecto front
