@@ -2,6 +2,7 @@
 @using Neitek.services.Metas
 
 @inject IMetaService MetaService
+@inject ITareaService TareaService
 <style>
     .c {
         background-color: white;
@@ -12,6 +13,33 @@
         color: white;
     }
 
+    progress {
+        border: none;
+        width: 400px;
+        height: 10px;
+        background: crimson;
+    }
+
+    progress {
+        color: lightblue;
+    }
+
+        progress::-webkit-progress-value {
+            background: lightblue;
+        }
+
+        progress::-moz-progress-bar {
+            background: lightblue;
+        }
+
+    .mano {
+        cursor: pointer;
+    }
+    img{
+        width: 20px;
+        height: 20px;
+    
+    }
 </style>
 
 <PageTitle>Home</PageTitle>
@@ -27,7 +55,7 @@
             <div class="modal-body">
                 <div class="col-md-6">
                     <label for="nombre" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" @bind-value="meta.Nombre" required>
+                    <input type="text" maxlength="80" class="form-control" id="nombre" @bind-value="meta.Nombre" required>
                     <div class="invalid-feedback">
                         Por favor añada un nombre a la tarea.
                     </div>
@@ -46,11 +74,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header btnColor">
-                <h5 class="modal-title" id="MetaModalLabel">@action Meta</h5>
+                <h5 class="modal-title" id="MetaModalLabel">Atencion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               @validationMessage
+                @validationMessage
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @onclick="hiddenModalValidation" data-bs-dismiss="modal">Cerrar</button>
@@ -70,50 +98,141 @@
     <article class="content col col-4 c mr">
         @if (MetasList.Count() == 0)
         {
-            <strong>No se han creado tareas...</strong>
+            <strong>No se han creado metas...</strong>
         }
         else
         {
-            <button type="button" class="btn btnColor mb-4" data-bs-toggle="modal" @onclick="AddMeta" data-bs-target="#MetaModal">Nueva Meta</button>
-            <ul>
-                @foreach (var item in MetasList)
-                {
-                    <li class="mb-4" @onclick="((args)=>GetTareasByMetaID(args,item.PkMeta))">
-                        <div class="row">
-                            <div class="col col-5">@item.Nombre</div>
-                            <div class="col col-7">
+            <butto type="button" class="btn btnColor mb-4" data-bs-toggle="modal" @onclick="AddMeta" data-bs-target="#MetaModal">Nueva Meta</butto>
+            <table>
+                <tbody>
+
+                    @foreach (var item in MetasList)
+                    {
+                        <tr>
+                            <td class="mano" @onclick="(args)=>GetTareasByMetaID(args,item.PkMeta)"><strong>@item.Nombre</strong></td>
+                            <td>
                                 <button data-bs-toggle="modal" data-bs-target="#MetaModal" @onclick="((args) => OnEditMeta(args, item))">Edit</button>
                                 <button @onclick="((args)=>OnDeleteMeta(args,item.PkMeta))">Delete</button>
-                            </div>
-                        </div>
-                        <div class="row">
-                            @item.FechaCreacion.ToShortDateString()
-                        </div>
-                         <div class="row">
-                Tareas completadas @item.Completas / @item.TotalTareasByMeta
-                </div>
-                        <progress value="@item.Porcentaje" max="100" style="--value: 25; --max: 100;" />
-                    </li>
-                }
-            </ul>
+                            </td>
+                        </tr
+                        <tr>
+                            <td>@item.FechaCreacion.ToShortDateString()</td>
+                        </tr>
+                            <tr>
+                                <td>Tareas completadas @item.Completas / @item.TotalTareasByMeta</td>
+                                <td></td>
+                                <td>@Math.Round(@item.Porcentaje, 1) %</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"><progress value="@item.Porcentaje" max="100" style="--value: @item.Porcentaje; --max: 100; width:100%" /></td>
+                            </tr>
+                    }
+                    </tbody>
+                </table>
         }
     </article>
-    <article class="col col-1"></article>
-    <article class="content px-4 col col-7 ml c">
-        <div class="row">
-            <div class="col col-3">
-                <button class="btn btnColor">Agreagar tarea</button>
-            </div>
-        </div>
 
-    </article>
+<article class="col col-1"></article>
+<article class="content px-4 col col-7 ml c">
+    <div class="row">
+        <div class="col col-3 mb-4">
+            <button class="btn btnColor">Agreagar tarea</button>
+        </div>
+            <div class="col col-3 mb-4">
+            <button class="btn btnColor">Completar tarea</button>
+        </div>
+        <div class="col col-3 mb-4">
+            <button class="btn btnColor">Editar tarea</button>
+        </div>
+        <div class="col col-3 mb-4">
+            <button class="btn btnColor">Eliminar tarea</button>
+        </div>
+        @if (TareasList==null || TareasList.Count()==0)
+            {
+                <strong>Aun no tienes tareas asignadas para esta meta</strong>
+            }
+            else
+            {
+                
+            <table class="col col-12">
+                <thead>
+                    <tr>
+                        <th data-field="pkTarea" hidden></th>
+                        <th>
+                            <input @onclick="SelectAll" type="checkbox" />
+                        </th>
+                        <th data-field=""></th>
+                        <th >Nombre</th>
+                        <th >Fecha Creacion</th>
+                        <th >Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var tarea in TareasPage)
+                    {
+                        <tr>
+                            <td hidden>@tarea.PkTarea</td>
+                            <td>
+                                <input type="checkbox" @bind="tarea.Selected"  @onclick="(args)=>AddToSelectedList(args,tarea)" />
+                            </td>
+                            <td>
+                                @if(@tarea.Importante)
+                                {
+                                    <img alt="@tarea.Importante" src="Assets/img/star-True.png"/>
+                                }
+                                else
+                                {
+                                    <img alt="@tarea.Importante" src="Assets/img/star-False.png"/>
+                                }
+                                
+                            </td>
+                            
+                            <td>@tarea.NombreTarea</td>
+                            <td>@tarea.FechaCreacion.ToShortDateString()</td>
+                            @if(@tarea.Completada)
+                            {
+                                <td>Completada</td>
+                            }
+                            else
+                            {
+                                <td>Abierta</td>
+                            }
+                        </tr>
+                    }
+                        </tbody>
+
+            </table>
+            <div class="row">
+  <ul class="pagination">
+    @for (int i = 1; i <= totalPage; i++)
+                        {
+                            var j = i;
+                            <li @onclick="(args)=>GetMetasByPage(args,j)" class="page-item"><span class="page-link" >@i</span></li>
+                        }
+  </ul>
+                </div>
+            }
+    </div>
+
+</article>
 </div>
 @code {
     private List<MetasView>? MetasList;
+    private List<Tarea>? TareasList;
+    private List<Tarea>? TareasPage;
+    private List<Tarea>? TareasListSelected;
     private Meta meta = new Meta();
     private string action = "";
     private string showValidation = "none";
     private string validationMessage = "";
+    private string tareasJson = "";
+    private bool selectAll = false;
+    private int itemsPerPage = 5;
+    private int totalPage;
+    // private int page = 1;
+    private MetasView metaSelected;
+    
+    #region Metas
 
     protected override void OnInitialized()
     {
@@ -125,6 +244,7 @@
     {
         MetasList = new List<MetasView>();
         MetasList = MetaService.GetMetas().Result;
+        TareasListSelected = new List<Tarea>();
 
     }
 
@@ -139,7 +259,7 @@
         meta.PkMeta = e.PkMeta;
         meta.Nombre = e.Nombre;
     }
-    private void hiddenModalValidation()=>
+    private void hiddenModalValidation() =>
         showValidation = "none";
     private void SaveMeta()
     {
@@ -168,15 +288,60 @@
         meta = new Meta();
         LoadMetas();
     }
+
+
     private void OnDeleteMeta(EventArgs args, int id)
     {
         MetaService.DeleteMeta(id);
         LoadMetas();
     }
-
-    private void GetTareasByMetaID(EventArgs eventArgs,int idMeta)
+    
+    #endregion Metas
+    
+    #region Tareas
+    private void GetTareasByMetaID(EventArgs eventArgs, int idMeta)
     {
-        
+        metaSelected = MetasList.Find(p => p.PkMeta == idMeta);
+        totalPage = (int)Math.Ceiling((double)metaSelected.TotalTareasByMeta / itemsPerPage);
+        TareasList = TareaService.GetTareasByFkMeta(idMeta);
+        GetMetasByPage(null,1);
     }
+
+    private void AddToSelectedList(EventArgs eventArgs, Tarea tarea)
+    {
+        if (TareasListSelected.Exists(t=>t.PkTarea==tarea.PkTarea))
+        {
+            TareasListSelected.Remove(tarea);
+            return;
+        }
+        TareasListSelected.Add(tarea);
+    }
+
+    private void SelectAll()
+    {
+        selectAll = !selectAll;
+
+        TareasListSelected.Clear();
+
+        if (selectAll)
+            foreach (var tarea in TareasList)
+            {
+                tarea.Selected = selectAll;
+                TareasListSelected.Add(tarea);
+            }
+       else
+            foreach (var tarea in TareasList)
+            {
+                tarea.Selected = selectAll;
+            }
+         
+
+    }
+
+    private void GetMetasByPage(EventArgs eventArgs, int page)
+    {
+        TareasPage = TareasList.Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
+    }
+    #endregion
 
 }
