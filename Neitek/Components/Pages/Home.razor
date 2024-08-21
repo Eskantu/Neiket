@@ -89,10 +89,10 @@
                         <div class="row">
                             @item.FechaCreacion.ToShortDateString()
                         </div>
-                        @*  <div class="row">
-                Tareas completadas @item.TareasCompletadas / @item.TotalTareas
-                </div> *@
-                        <progress value="50" max="100" style="--value: 25; --max: 100;" />
+                         <div class="row">
+                Tareas completadas @item.Completas / @item.TotalTareasByMeta
+                </div>
+                        <progress value="@item.Porcentaje" max="100" style="--value: 25; --max: 100;" />
                     </li>
                 }
             </ul>
@@ -109,7 +109,7 @@
     </article>
 </div>
 @code {
-    private List<Meta>? MetasList;
+    private List<MetasView>? MetasList;
     private Meta meta = new Meta();
     private string action = "";
     private string showValidation = "none";
@@ -123,7 +123,7 @@
 
     private void LoadMetas()
     {
-        MetasList = new List<Meta>();
+        MetasList = new List<MetasView>();
         MetasList = MetaService.GetMetas().Result;
 
     }
@@ -133,10 +133,11 @@
         action = "Add";
     }
 
-    protected void OnEditMeta(EventArgs args, Meta e)
+    protected void OnEditMeta(EventArgs args, MetasView e)
     {
         action = "Edit";
-        meta = e;
+        meta.PkMeta = e.PkMeta;
+        meta.Nombre = e.Nombre;
     }
     private void hiddenModalValidation()=>
         showValidation = "none";

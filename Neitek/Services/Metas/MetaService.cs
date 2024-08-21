@@ -67,7 +67,7 @@ namespace Neitek.Services.Metas
             }
         }
 
-        public async Task<List<services.Metas.Meta>> GetMetas()
+        public async Task<List<services.Metas.MetasView>> GetMetas()
         {
             using (HttpClient client = new HttpClient())
             {
@@ -76,7 +76,7 @@ namespace Neitek.Services.Metas
                 if (response.IsSuccessStatusCode)
                 {
                     string result = response.Content.ReadAsStringAsync().Result;
-                    var metas = System.Text.Json.JsonSerializer.Deserialize<List<Meta>>(result, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = false,  });
+                    var metas = System.Text.Json.JsonSerializer.Deserialize<List<MetasView>>(result, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = false,  });
                     return metas;
                 }
                 else

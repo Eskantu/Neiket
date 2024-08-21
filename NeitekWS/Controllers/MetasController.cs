@@ -22,9 +22,9 @@ namespace NeitekWS.Controllers
 
         // GET: api/Metas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Meta>>> GetMetas()
+        public async Task<ActionResult<IEnumerable<MetasView>>> GetMetas()
         {
-            return await _context.Metas.ToListAsync();
+            return _context.MetasView.FromSqlRaw("SELECT PkMeta,Nombre,FechaCreacion,TotalTareasByMeta,Porcentaje,Completas FROM [dbo].[MetasView]").ToList();
         }
 
         // GET: api/Metas/5

@@ -19,6 +19,8 @@ public partial class NeitekContext : DbContext
 
     public virtual DbSet<Tarea> Tareas { get; set; }
 
+    public virtual DbSet<MetasView> MetasView { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Meta>(entity =>
@@ -42,6 +44,19 @@ public partial class NeitekContext : DbContext
                 .HasForeignKey(d => d.FkMeta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Tareas_Tareas");
+        });
+        modelBuilder.Entity<MetasView>(entity =>
+        {
+            entity.HasNoKey();
+
+            entity.ToView("MetasView");
+
+            entity.Property(e => e.FechaCreacion).HasColumnType("date");
+
+            entity.Property(e => e.Nombre)
+                .IsRequired()
+                .HasMaxLength(80)
+                .IsUnicode(false);
         });
 
         OnModelCreatingPartial(modelBuilder);

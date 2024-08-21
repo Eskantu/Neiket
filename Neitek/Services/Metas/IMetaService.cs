@@ -8,7 +8,7 @@ namespace Neitek.Services.Metas
     {
         bool CreateMeta(Meta meta);
         bool DeleteMeta(int idMeta);
-        Task<List<Meta>> GetMetas();
+        Task<List<MetasView>> GetMetas();
         bool UpdateMeta(Meta metaUpdate);
     }
 }
