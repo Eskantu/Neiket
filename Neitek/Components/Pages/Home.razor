@@ -162,9 +162,27 @@
                             <input @onclick="SelectAll" type="checkbox" />
                         </th>
                         <th data-field=""></th>
-                        <th >Nombre</th>
-                        <th >Fecha Creacion</th>
-                        <th >Estado</th>
+                        <th >
+                            <div class="row px-3">
+                                <span>Nombre</span>
+                                <input title="Presiona tab para buscar"  placeholder="Ingrea un nombre para buascar y presiona tab" @onchange="ChangeNombreSearch" type="text"/>
+                            </div>
+                        </th>
+                        <th >
+                         <div class="row px-3">
+                             <span>Fecha Creacion</span>
+                             <input  @onchange="ChangeFechaCreacionSearch" type="date"/>
+                         </div>
+                        </th>
+                        <th >
+                            <div class="row px-3">
+                                    <span>Estado</span>
+                                <select @onchange="ChangeEstado">
+                                    <option value="-1">Select option</option>
+                                    <option value="0">Abierta</option>
+                                    <option value="1">Completada</option></select>
+                            </div>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -184,7 +202,6 @@
                                 {
                                     <img alt="@tarea.Importante" src="Assets/img/star-False.png"/>
                                 }
-                                
                             </td>
                             
                             <td>@tarea.NombreTarea</td>
@@ -229,9 +246,13 @@
     private bool selectAll = false;
     private int itemsPerPage = 5;
     private int totalPage;
-    // private int page = 1;
     private MetasView metaSelected;
-    
+
+
+    private string NombreSearch = "";
+    private string FechaCreacionSearch = "";
+    private bool EstadoSearch;
+
     #region Metas
 
     protected override void OnInitialized()
@@ -295,9 +316,9 @@
         MetaService.DeleteMeta(id);
         LoadMetas();
     }
-    
+
     #endregion Metas
-    
+
     #region Tareas
     private void GetTareasByMetaID(EventArgs eventArgs, int idMeta)
     {
@@ -329,18 +350,44 @@
                 tarea.Selected = selectAll;
                 TareasListSelected.Add(tarea);
             }
-       else
+        else
             foreach (var tarea in TareasList)
             {
                 tarea.Selected = selectAll;
             }
-         
+
 
     }
 
     private void GetMetasByPage(EventArgs eventArgs, int page)
     {
         TareasPage = TareasList.Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
+    }
+
+    private void ChangeEstado(ChangeEventArgs e)
+    {
+        if (e.Value.ToString() == "-1")
+            return;
+        EstadoSearch = e.Value.ToString()=="1"?true:false;
+         TareasList = TareaService.GetTareasByFkMeta(metaSelected.PkMeta).Where(p => p.Completada == EstadoSearch).ToList();
+        totalPage = (int)Math.Ceiling((double)TareasList.Count() / itemsPerPage);
+        GetMetasByPage(null, 1);
+    }
+
+    public void ChangeNombreSearch(ChangeEventArgs e)
+    {
+        NombreSearch = e.Value.ToString();
+        TareasList = TareaService.GetTareasByFkMeta(metaSelected.PkMeta).Where(p => p.NombreTarea.Contains(NombreSearch)).ToList();
+        totalPage = (int)Math.Ceiling((double)TareasList.Count() / itemsPerPage);
+        GetMetasByPage(null, 1);
+    }
+
+    public void ChangeFechaCreacionSearch(ChangeEventArgs e)
+    {
+        FechaCreacionSearch = e.Value.ToString();
+        TareasList = TareaService.GetTareasByFkMeta(metaSelected.PkMeta).Where(p => p.FechaCreacion.ToString("yyyy-MM-dd")==FechaCreacionSearch).ToList();
+        totalPage = (int)Math.Ceiling((double)TareasList.Count() / itemsPerPage);
+        GetMetasByPage(null, 1);
     }
     #endregion
 
