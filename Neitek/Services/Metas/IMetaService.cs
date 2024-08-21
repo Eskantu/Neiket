@@ -1,0 +1,14 @@
+﻿
+
+using Neitek.services.Metas;
+
+namespace Neitek.Services.Metas
+{
+    public interface IMetaService
+    {
+        bool CreateMeta(Meta meta);
+        bool DeleteMeta(int idMeta);
+        Task<List<Meta>> GetMetas();
+        bool UpdateMeta(Meta metaUpdate);
+    }
+}
