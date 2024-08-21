@@ -7,7 +7,7 @@ namespace Neitek.Services.Tareas
     public partial class Tarea
     {
         [JsonPropertyName("pkTarea")]
-        public int PkTarea { get; set; }
+        public int? PkTarea { get; set; }
 
         [JsonPropertyName("nombreTarea")]
         public string NombreTarea { get; set; } = null!;
@@ -19,12 +19,9 @@ namespace Neitek.Services.Tareas
         public bool Completada { get; set; }
 
         [JsonPropertyName("fkMeta")]
-        public int FkMeta { get; set; }
+        public int? FkMeta { get; set; }
 
         [JsonPropertyName("importante")]
         public bool Importante { get; set; }
-
-
-        public virtual services.Metas.Meta FkMetaNavigation { get; set; } = null!;
     }
 }

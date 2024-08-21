@@ -14,6 +14,7 @@ namespace Neitek.Services.Tareas
 
         public bool CreateTarea(Tarea tarea)
         {
+            tarea.PkTarea = 0;
             tarea.FechaCreacion = DateOnly.FromDateTime(DateTime.Now);
             tarea.Completada = false;
             tarea.Importante = false; 
@@ -57,7 +58,7 @@ namespace Neitek.Services.Tareas
             }
         }
 
-        public bool DeleteTarea(int idTarea)
+        public bool DeleteTarea(int? idTarea)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -92,7 +93,7 @@ namespace Neitek.Services.Tareas
             }
         }
 
-        public List<TareaViewModel> GetTareasByFkMeta(int fkMeta)
+        public List<TareaViewModel> GetTareasByFkMeta(int? fkMeta)
         {
             List<TareaViewModel> tareasViewModel = new List<TareaViewModel>();
             using (HttpClient client = new HttpClient())

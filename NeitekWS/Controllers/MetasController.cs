@@ -24,7 +24,7 @@ namespace NeitekWS.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MetasView>>> GetMetas()
         {
-            return _context.MetasView.FromSqlRaw("SELECT PkMeta,Nombre,FechaCreacion,TotalTareasByMeta,Porcentaje,Completas FROM [dbo].[MetasView]").ToList();
+            return _context.MetasViews.FromSqlRaw("SELECT PkMeta,Nombre,FechaCreacion,TotalTareasByMeta,Porcentaje,Completas FROM [dbo].[MetasView]").ToList();
         }
 
         // GET: api/Metas/5
@@ -92,7 +92,7 @@ namespace NeitekWS.Controllers
             {
                 return NotFound();
             }
-
+            _context.Tareas.RemoveRange(_context.Tareas.Where(t => t.FkMeta == id));
             _context.Metas.Remove(meta);
             await _context.SaveChangesAsync();
 

@@ -17,9 +17,9 @@ public partial class NeitekContext : DbContext
 
     public virtual DbSet<Meta> Metas { get; set; }
 
-    public virtual DbSet<Tarea> Tareas { get; set; }
+    public virtual DbSet<MetasView> MetasViews { get; set; }
 
-    public virtual DbSet<MetasView> MetasView { get; set; }
+    public virtual DbSet<Tarea> Tareas { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,29 +32,23 @@ public partial class NeitekContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<MetasView>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("MetasView");
+
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.Porcentaje).HasColumnType("decimal(5, 3)");
+        });
+
         modelBuilder.Entity<Tarea>(entity =>
         {
             entity.HasKey(e => e.PkTarea);
 
             entity.Property(e => e.NombreTarea)
-                .HasMaxLength(80)
-                .IsUnicode(false);
-
-            entity.HasOne(d => d.FkMetaNavigation).WithMany(p => p.Tareas)
-                .HasForeignKey(d => d.FkMeta)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Tareas_Tareas");
-        });
-        modelBuilder.Entity<MetasView>(entity =>
-        {
-            entity.HasNoKey();
-
-            entity.ToView("MetasView");
-
-            entity.Property(e => e.FechaCreacion).HasColumnType("date");
-
-            entity.Property(e => e.Nombre)
-                .IsRequired()
                 .HasMaxLength(80)
                 .IsUnicode(false);
         });

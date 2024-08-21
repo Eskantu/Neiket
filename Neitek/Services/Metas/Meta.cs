@@ -9,7 +9,7 @@ namespace Neitek.services.Metas;
 public partial class Meta
 {
     [JsonPropertyName("pkMeta")]
-    public int PkMeta { get; set; }
+    public int? PkMeta { get; set; }
     [JsonPropertyName("nombre")]
     public string Nombre { get; set; }
     [JsonPropertyName("fechaCreacion")]

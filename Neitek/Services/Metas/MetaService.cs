@@ -16,6 +16,7 @@ namespace Neitek.Services.Metas
         }
         public bool CreateMeta(Meta meta)
         {
+            meta.PkMeta=0;
             meta.FechaCreacion=new DateOnly(DateTime.Now.Year,DateTime.Now.Month,DateTime.Now.Day);
 
             using (HttpClient client = new HttpClient())
@@ -50,7 +51,7 @@ namespace Neitek.Services.Metas
             }
         }
 
-        public bool DeleteMeta(int idMeta)
+        public bool DeleteMeta(int? idMeta)
         {
             using (HttpClient client = new HttpClient())
             {

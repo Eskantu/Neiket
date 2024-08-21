@@ -112,6 +112,26 @@
     </div>
 </div>
 
+<!--Delete modal-->
+<div class="modal fade" id="DeleteModal" tabindex="-1" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header btnColor">
+              <h5 class="modal-title" id="DeleteModalLabel">@action Delete</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+                @DeleteMessage
+            </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+@*               <button type="button" class="btn btn-primary" style="display:@deleteMeta" data-bs-dismiss="modal" @onclick="Delete">Confirmar</button>
+              <button type="button" class="btn btn-primary" style="display:@deletetarea" data-bs-dismiss="modal" @onclick="EliminarSelected">Confirmar</button> *@
+          </div>
+      </div>
+  </div>
+</div>
+
 
 
 <div class="row">
@@ -121,13 +141,13 @@
         </h4>
     </div>
     <article class="content col col-4 c mr">
+            <button type="button" class="btn btnColor mb-4" data-bs-toggle="modal" @onclick="AddMeta" data-bs-target="#MetaModal">Nueva Meta</button>
         @if (MetasList.Count() == 0)
         {
             <strong>No se han creado metas...</strong>
         }
         else
         {
-            <butto type="button" class="btn btnColor mb-4" data-bs-toggle="modal" @onclick="AddMeta" data-bs-target="#MetaModal">Nueva Meta</butto>
             <table>
                 <tbody>
 
@@ -135,13 +155,13 @@
                     {
                         <tr>
                             <td class="mano" @onclick="(args)=>GetTareasByMetaID(args,item.PkMeta)"><strong>@item.Nombre</strong></td>
-                            <td>
-                                <button data-bs-toggle="modal" data-bs-target="#MetaModal" @onclick="((args) => OnEditMeta(args, item))">Edit</button>
-                                <button @onclick="((args)=>OnDeleteMeta(args,item.PkMeta))">Delete</button>
+                            <td colspan="2">
+                                <button class=" btnColor" data-bs-toggle="modal" data-bs-target="#MetaModal" @onclick="((args) => OnEditMeta(args, item))">Edit</button>
+                                <button class=" btnColor" @onclick="((args)=>OnDeleteMeta(args,item.PkMeta))">Delete</button>
                             </td>
                         </tr
                         <tr>
-                            <td>@item.FechaCreacion.ToShortDateString()</td>
+                            <td>@item.FechaCreacion</td>
                         </tr>
                             <tr>
                                 <td>Tareas completadas @item.Completas / @item.TotalTareasByMeta</td>
@@ -164,17 +184,17 @@
             <button data-bs-target="#TareaModal" data-bs-toggle="modal" @onclick="AddTarea" class="btn btnColor">Agreagar tarea</button>
         </div>
             <div class="col col-3 mb-4">
-            <button style="visibility:@showCompletar" class="btn btnColor">Completar tarea</button>
+            <button style="visibility:@showCompletar" @onclick="completarSelected" class="btn btnColor">Completar tarea</button>
         </div>
         <div class="col col-3 mb-4">
             <button data-bs-target="#TareaModal" style="visibility:@showEditar" @onclick="OnEditTarea" data-bs-toggle="modal" class="btn btnColor">Editar tarea</button>
         </div>
         <div class="col col-3 mb-4">
-            <button style="visibility:@showEliminar" class="btn btnColor">Eliminar tarea</button>
+            <button style="visibility:@showEliminar" @onclick="EliminarSelected" class="btn btnColor">Eliminar tarea</button>
         </div>
         @if (TareasList==null || TareasList.Count()==0)
             {
-                <strong>Aun no tienes tareas asignadas para esta meta</strong>
+                <strong>Aun no tienes tareas asignadas para la meta </strong>
             }
             else
             {
@@ -218,7 +238,7 @@
                             <td>
                                 <input type="checkbox" @bind="tarea.Selected"  @onclick="(args)=>AddToSelectedList(args,tarea)" />
                             </td>
-                            <td>
+                            <td class="mano" @onclick="(args)=>changePriority(args, tarea)">
                                 @if(@tarea.Importante)
                                 {
                                     <img alt="@tarea.Importante" src="Assets/img/star-True.png"/>
@@ -268,6 +288,7 @@
     private string action = "";
     private string showValidation = "none";
     private string validationMessage = "";
+    private string DeleteMessage = "";
     private string tareasJson = "";
     private bool selectAll = false;
     private int itemsPerPage = 5;
@@ -342,21 +363,28 @@
     }
 
 
-    private void OnDeleteMeta(EventArgs args, int id)
+    private void OnDeleteMeta(EventArgs args, int? id)
     {
         MetaService.DeleteMeta(id);
+        TareasList = new List<TareaViewModel>();
         LoadMetas();
     }
 
     #endregion Metas
 
     #region Tareas
-    private void GetTareasByMetaID(EventArgs eventArgs, int idMeta)
+    private void GetTareasByMetaID(EventArgs eventArgs, int? idMeta)
     {
         metaSelected = MetasList.Find(p => p.PkMeta == idMeta);
         totalPage = (int)Math.Ceiling((double)metaSelected.TotalTareasByMeta / itemsPerPage);
         TareasList = TareaService.GetTareasByFkMeta(idMeta);
         GetMetasByPage(null,1);
+        LoadMetas();
+    }
+
+    private void Delete()
+    {
+        
     }
 
     private void AddTarea()
@@ -392,29 +420,47 @@
         if (action == "Add")
         {
             tarea.FkMeta = metaSelected.PkMeta;
-            tarea.FkMetaNavigation =new Meta
-            {
-                PkMeta = metaSelected.PkMeta,
-                Nombre = metaSelected.Nombre,
-                FechaCreacion = metaSelected.FechaCreacion
-            };
+
             TareaService.CreateTarea(tarea as Tarea);
         }
         else
         {
-            tarea.FkMetaNavigation = new Meta
-            {
-                PkMeta = metaSelected.PkMeta,
-                Nombre = metaSelected.Nombre,
-                FechaCreacion = metaSelected.FechaCreacion
-            };
+
             TareaService.UpdateTarea((Tarea)tarea);
+            showEditar = "hidden";
         }
+
         tarea = new ();
         GetTareasByMetaID(null,metaSelected.PkMeta);
     }
+    private void completarSelected()
+    {
+        foreach (var tarea in TareasListSelected)
+        {
+            tarea.Completada = true;
+            TareaService.UpdateTarea((Tarea)tarea);
+        }
+        showEditar = showEliminar = showCompletar = "hidden";
+        GetTareasByMetaID(null,metaSelected.PkMeta);
+        TareasListSelected.Clear();
+    }
 
-
+    private void EliminarSelected()
+    {
+        foreach (var tarea in TareasListSelected)
+        {
+            TareaService.DeleteTarea(tarea.PkTarea);
+        }
+        GetTareasByMetaID(null,metaSelected.PkMeta);
+        showEditar = showEliminar = showCompletar = "hidden";
+        TareasListSelected.Clear();
+    }
+    private void changePriority(EventArgs eventArgs, TareaViewModel tarea)
+    {
+        tarea.Importante = !tarea.Importante;
+        TareaService.UpdateTarea((Tarea)tarea);
+        GetTareasByMetaID(null,metaSelected.PkMeta);
+    }
 
 
     private void AddToSelectedList(EventArgs eventArgs, TareaViewModel tarea)
@@ -427,7 +473,7 @@
         {
         TareasListSelected.Add(tarea);
         }
-        showCompletar = showEliminar = TareasListSelected.Count>1?"visible":"hidden";
+        showCompletar = showEliminar = TareasListSelected.Count>0?"visible":"hidden";
         showEditar= (TareasListSelected.Count>=1 || TareasListSelected.Count!=0) && TareasListSelected.Count<2 ?"visible":"hidden";
     }
 

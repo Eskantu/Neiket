@@ -16,6 +16,4 @@ public partial class Tarea
     public int FkMeta { get; set; }
 
     public bool Importante { get; set; }
-
-    public virtual Meta FkMetaNavigation { get; set; } = null!;
 }
