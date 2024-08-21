@@ -94,7 +94,7 @@ namespace NeitekWS.Controllers
             _context.Tareas.Add(tarea);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTarea", new { id = tarea.PkTarea }, tarea);
+            return Ok();
         }
 
         // DELETE: api/Tareas/5

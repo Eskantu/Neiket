@@ -14,6 +14,9 @@ namespace Neitek.Services.Tareas
 
         public bool CreateTarea(Tarea tarea)
         {
+            tarea.FechaCreacion = DateOnly.FromDateTime(DateTime.Now);
+            tarea.Completada = false;
+            tarea.Importante = false; 
             using (HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri(urlService);
@@ -31,18 +34,26 @@ namespace Neitek.Services.Tareas
 
         public bool UpdateTarea(Tarea tareaUpdate)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                client.BaseAddress = new Uri(urlService);
-                var response = client.PutAsJsonAsync($"api/Tareas/{tareaUpdate.PkTarea}", tareaUpdate).Result;
-                if (response.IsSuccessStatusCode)
+                using (HttpClient client = new HttpClient())
                 {
-                    return true;
+                    client.BaseAddress = new Uri(urlService);
+                    var response = client.PutAsJsonAsync($"api/Tareas/{tareaUpdate.PkTarea}", tareaUpdate).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
-                else
-                {
-                    return false;
-                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
             }
         }
 
@@ -81,8 +92,9 @@ namespace Neitek.Services.Tareas
             }
         }
 
-        public List<Tarea> GetTareasByFkMeta(int fkMeta)
+        public List<TareaViewModel> GetTareasByFkMeta(int fkMeta)
         {
+            List<TareaViewModel> tareasViewModel = new List<TareaViewModel>();
             using (HttpClient client = new HttpClient())
             {
                 client.BaseAddress = new Uri(urlService);
@@ -90,7 +102,21 @@ namespace Neitek.Services.Tareas
                 if (response.IsSuccessStatusCode)
                 {
                     var tareas = System.Text.Json.JsonSerializer.Deserialize<List<Tarea>>(response.Content.ReadAsStringAsync().Result);
-                    return tareas;
+                    foreach (var item in tareas)
+                    {
+                        tareasViewModel.Add(new TareaViewModel
+                        {
+                            FkMeta = item.FkMeta,
+                            FechaCreacion = item.FechaCreacion,
+                            Importante = item.Importante,
+                            NombreTarea = item.NombreTarea,
+                            PkTarea = item.PkTarea,
+                            Completada = item.Completada,
+                            Selected = false
+                            
+                        });
+                    }
+                    return tareasViewModel;
                 }
                 else
                 {

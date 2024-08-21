@@ -24,7 +24,6 @@ namespace Neitek.Services.Tareas
         [JsonPropertyName("importante")]
         public bool Importante { get; set; }
 
-        public bool Selected { get; set; }
 
         public virtual services.Metas.Meta FkMetaNavigation { get; set; } = null!;
     }

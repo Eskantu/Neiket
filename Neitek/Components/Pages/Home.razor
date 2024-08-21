@@ -69,6 +69,31 @@
     </div>
 </div>
 
+<!--Modals Tareas-->
+<div class="modal fade" id="TareaModal" tabindex="-1" aria-labelledby="TareaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header btnColor">
+              <h5 class="modal-title" id="TareaModalLabel">@action Tarea</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="col-md-6">
+                  <label for="nombre" class="form-label">Nombre</label>
+                  <input type="text" maxlength="80" class="form-control" id="nombre" @bind-value="tarea.NombreTarea" required>
+                  <div class="invalid-feedback">
+                      Por favor añada un nombre a la tarea.
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="SaveTarea">Guardar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
 <!--Modal validation-->
 <div class="modal fade show" id="ValidationModal" tabindex="-1" aria-labelledby="ValidationModalLabel" style="display: @showValidation;" aria-modal="true" role="dialog">
     <div class="modal-dialog">
@@ -136,16 +161,16 @@
 <article class="content px-4 col col-7 ml c">
     <div class="row">
         <div class="col col-3 mb-4">
-            <button class="btn btnColor">Agreagar tarea</button>
+            <button data-bs-target="#TareaModal" data-bs-toggle="modal" @onclick="AddTarea" class="btn btnColor">Agreagar tarea</button>
         </div>
             <div class="col col-3 mb-4">
-            <button class="btn btnColor">Completar tarea</button>
+            <button style="visibility:@showCompletar" class="btn btnColor">Completar tarea</button>
         </div>
         <div class="col col-3 mb-4">
-            <button class="btn btnColor">Editar tarea</button>
+            <button data-bs-target="#TareaModal" style="visibility:@showEditar" @onclick="OnEditTarea" data-bs-toggle="modal" class="btn btnColor">Editar tarea</button>
         </div>
         <div class="col col-3 mb-4">
-            <button class="btn btnColor">Eliminar tarea</button>
+            <button style="visibility:@showEliminar" class="btn btnColor">Eliminar tarea</button>
         </div>
         @if (TareasList==null || TareasList.Count()==0)
             {
@@ -235,10 +260,11 @@
 </div>
 @code {
     private List<MetasView>? MetasList;
-    private List<Tarea>? TareasList;
-    private List<Tarea>? TareasPage;
-    private List<Tarea>? TareasListSelected;
+    private List<TareaViewModel>? TareasList;
+    private List<TareaViewModel>? TareasPage;
+    private List<TareaViewModel>? TareasListSelected;
     private Meta meta = new Meta();
+    private TareaViewModel tarea = new TareaViewModel();
     private string action = "";
     private string showValidation = "none";
     private string validationMessage = "";
@@ -247,6 +273,10 @@
     private int itemsPerPage = 5;
     private int totalPage;
     private MetasView metaSelected;
+
+    private string showEditar = "hidden";
+    private string showCompletar = "hidden";
+    private string showEliminar = "hidden";
 
 
     private string NombreSearch = "";
@@ -265,9 +295,12 @@
     {
         MetasList = new List<MetasView>();
         MetasList = MetaService.GetMetas().Result;
-        TareasListSelected = new List<Tarea>();
+        TareasListSelected = new List<TareaViewModel>();
 
     }
+
+    private void hiddenModalValidation() =>
+        showValidation = "none";
 
     private void AddMeta()
     {
@@ -280,8 +313,6 @@
         meta.PkMeta = e.PkMeta;
         meta.Nombre = e.Nombre;
     }
-    private void hiddenModalValidation() =>
-        showValidation = "none";
     private void SaveMeta()
     {
         if (MetasList.Exists(p => p.Nombre == meta.Nombre))
@@ -328,14 +359,76 @@
         GetMetasByPage(null,1);
     }
 
-    private void AddToSelectedList(EventArgs eventArgs, Tarea tarea)
+    private void AddTarea()
     {
-        if (TareasListSelected.Exists(t=>t.PkTarea==tarea.PkTarea))
+        action = "Add";
+    }
+
+    protected void OnEditTarea()
+    {
+        action = "Edit";
+        tarea.PkTarea = TareasListSelected[0].PkTarea;
+        tarea.NombreTarea = TareasListSelected[0].NombreTarea;
+        tarea.Completada = TareasListSelected[0].Completada;
+        tarea.Importante = TareasListSelected[0].Importante;
+        tarea.FechaCreacion = TareasListSelected[0].FechaCreacion;
+        tarea.FkMeta = TareasListSelected[0].FkMeta;
+    }
+    private void SaveTarea()
+    {
+        if (TareasList.Exists(p => p.NombreTarea == tarea.NombreTarea))
         {
-            TareasListSelected.Remove(tarea);
+            validationMessage = $"La tarea {meta.Nombre} ya existe, por favor añada un nombre diferente.";
+            showValidation = "block";
+            tarea = new TareaViewModel();
             return;
         }
+        if (string.IsNullOrEmpty(tarea.NombreTarea))
+        {
+            validationMessage = $"Por favor añada un nombre a la tarea.";
+            showValidation = "block";
+            return;
+        }
+        if (action == "Add")
+        {
+            tarea.FkMeta = metaSelected.PkMeta;
+            tarea.FkMetaNavigation =new Meta
+            {
+                PkMeta = metaSelected.PkMeta,
+                Nombre = metaSelected.Nombre,
+                FechaCreacion = metaSelected.FechaCreacion
+            };
+            TareaService.CreateTarea(tarea as Tarea);
+        }
+        else
+        {
+            tarea.FkMetaNavigation = new Meta
+            {
+                PkMeta = metaSelected.PkMeta,
+                Nombre = metaSelected.Nombre,
+                FechaCreacion = metaSelected.FechaCreacion
+            };
+            TareaService.UpdateTarea((Tarea)tarea);
+        }
+        tarea = new ();
+        GetTareasByMetaID(null,metaSelected.PkMeta);
+    }
+
+
+
+
+    private void AddToSelectedList(EventArgs eventArgs, TareaViewModel tarea)
+    {
+        if (TareasListSelected.Exists(t => t.PkTarea == tarea.PkTarea))
+        {
+            TareasListSelected.Remove(tarea);
+        }
+        else
+        {
         TareasListSelected.Add(tarea);
+        }
+        showCompletar = showEliminar = TareasListSelected.Count>1?"visible":"hidden";
+        showEditar= (TareasListSelected.Count>=1 || TareasListSelected.Count!=0) && TareasListSelected.Count<2 ?"visible":"hidden";
     }
 
     private void SelectAll()
@@ -345,16 +438,24 @@
         TareasListSelected.Clear();
 
         if (selectAll)
+        {
+            showCompletar = "visible";
+            showEliminar = "visible";
             foreach (var tarea in TareasList)
             {
                 tarea.Selected = selectAll;
                 TareasListSelected.Add(tarea);
             }
+        }
         else
-            foreach (var tarea in TareasList)
+        {
+             showCompletar = "hidden";
+            showEliminar = "hidden";
+        foreach (var tarea in TareasList)
             {
                 tarea.Selected = selectAll;
             }
+        }
 
 
     }

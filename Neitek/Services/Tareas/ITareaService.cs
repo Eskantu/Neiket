@@ -7,6 +7,6 @@ namespace Neitek.Services.Tareas
         bool DeleteTarea(int idTarea);
         List<Tarea> GetTareas();
         bool UpdateTarea(Tarea tareaUpdate);
-        List<Tarea> GetTareasByFkMeta(int fkMeta);
+        List<TareaViewModel> GetTareasByFkMeta(int fkMeta);
     }
 }
