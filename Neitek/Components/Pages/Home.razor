@@ -1,5 +1,7 @@
 ﻿@page "/"
+@using Neitek.services.Metas
 
+@inject IMetaService MetaService
 <style>
     .c {
         background-color: white;
@@ -10,22 +12,52 @@
         color: white;
     }
 
-    progress-bar {
-        width: 100%;
-        background-color: #e0e0e0;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    progress-bar-fill {
-        height: 24px;
-        background-color: #4caf50;
-        transition: width 0.4s ease;
-    }
-
 </style>
 
 <PageTitle>Home</PageTitle>
+
+<!-- Modal -->
+<div class="modal fade" id="MetaModal" tabindex="-1" aria-labelledby="MetaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btnColor">
+                <h5 class="modal-title" id="MetaModalLabel">@action Meta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-6">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" @bind-value="meta.Nombre" required>
+                    <div class="invalid-feedback">
+                        Por favor añada un nombre a la tarea.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="SaveMeta">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade show" id="ValidationModal" tabindex="-1" aria-labelledby="ValidationModalLabel" style="display: @showValidation;" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header btnColor">
+                <h5 class="modal-title" id="MetaModalLabel">@action Meta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               @validationMessage
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="hiddenModalValidation" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="row">
     <div class="top-row c mt-2 mb-2">
@@ -34,28 +66,35 @@
         </h4>
     </div>
     <article class="content col col-4 c mr">
-        <button class="btn btnColor mb-4">Nueva tarea</button>
-        <ul>
-            @foreach (var item in MetasList)
-            {
-                <li class="mb-4">
-                    <div class="row">
-                        <div class="col col-5">@item.Name</div>
-                        <div class="col col-7">
-                            <button>Edit</button>
-                            <button>Delete</button>
+        @if (MetasList == null || MetasList.Count() == 0)
+        {
+            <strong>Loading...</strong>
+        }
+        else
+        {
+            <button type="button" class="btn btnColor mb-4" data-bs-toggle="modal" @onclick="AddMeta" data-bs-target="#MetaModal">Nueva Meta</button>
+            <ul>
+                @foreach (var item in MetasList)
+                {
+                    <li class="mb-4">
+                        <div class="row">
+                            <div class="col col-5">@item.Nombre</div>
+                            <div class="col col-7">
+                                <button data-bs-toggle="modal" data-bs-target="#MetaModal" @onclick="((args) => OnEditMeta(args, item))">Edit</button>
+                                <button @onclick="((args)=>OnDeleteMeta(args,item.PkMeta))">Delete</button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        @item.FechaCreacion.ToShortDateString()
-                    </div>
-                    <div class="row">
-                        Tareas completadas @item.TareasCompletadas / @item.TotalTareas
-                    </div>
-                    <progress value="50" max="100" style="--value: 25; --max: 100;" />
-                </li>
-            }
-        </ul>
+                        <div class="row">
+                            @item.FechaCreacion.ToShortDateString()
+                        </div>
+                        @*  <div class="row">
+                Tareas completadas @item.TareasCompletadas / @item.TotalTareas
+                </div> *@
+                        <progress value="50" max="100" style="--value: 25; --max: 100;" />
+                    </li>
+                }
+            </ul>
+        }
     </article>
     <article class="col col-1"></article>
     <article class="content px-4 col col-7 ml c">
@@ -67,26 +106,92 @@
 
     </article>
 </div>
+
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
 @code {
-    private List<Metas>? MetasList;
+    private List<Meta>? MetasList;
+    private Meta meta = new Meta();
+    private string action = "";
+    private string showValidation = "none";
+     private string validationMessage = "";
 
-    public class Metas
+    protected override void OnInitialized()
     {
-        public string Name { get; set; }
-        public DateTime FechaCreacion { get; set; }
-        public int TotalTareas { get; set; }
-        public int TareasCompletadas { get; set; }
-        public decimal Porcentaje { get => Math.Round((decimal)TotalTareas / (decimal)TareasCompletadas); }
+        LoadMetas();
+        base.OnInitialized();
     }
 
-    protected override async Task OnInitializedAsync()
+    private void LoadMetas()
     {
-        MetasList = new List<Metas>();
-        for (int i = 1; i < 20; i++)
+        MetasList = new List<Meta>();
+        MetasList = MetaService.GetMetas().Result;
+
+    }
+
+    private void AddMeta()
+    {
+        action = "Add";
+    }
+
+    protected void OnEditMeta(EventArgs args, Meta e)
+    {
+        action = "Edit";
+        meta = e;
+    }
+    private void hiddenModalValidation()=>
+        showValidation = "none";
+    private void SaveMeta()
+    {
+        if (MetasList.Exists(p => p.Nombre == meta.Nombre))
         {
-            MetasList.Add(new Metas { Name = $"Meta {i + 1}", FechaCreacion = DateTime.Now.AddDays(i + 1), TotalTareas = (i + 1) * 100, TareasCompletadas = (i + 1) * 100 / i + 1 });
+            validationMessage = $"La meta {meta.Nombre} ya existe, por favor añada un nombre diferente.";
+            showValidation = "block";
+            meta = new Meta();
+            return;
         }
-    }
+        if (string.IsNullOrEmpty(meta.Nombre))
+        {
+            validationMessage = $"Por favor añada un nombre a la meta.";
+            showValidation = "block";
+            return;
+        }
+        if (action == "Add")
+        {
 
+            MetaService.CreateMeta(meta);
+        }
+        else
+        {
+            MetaService.UpdateMeta(meta);
+        }
+        meta = new Meta();
+        LoadMetas();
+    }
+    private void OnDeleteMeta(EventArgs args, int id)
+    {
+        MetaService.DeleteMeta(id);
+        LoadMetas();
+    }
 
 }
