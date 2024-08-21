@@ -16,7 +16,7 @@
 
 <PageTitle>Home</PageTitle>
 
-<!-- Modal -->
+<!-- Modals Meta-->
 <div class="modal fade" id="MetaModal" tabindex="-1" aria-labelledby="MetaModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -41,7 +41,7 @@
     </div>
 </div>
 
-
+<!--Modal validation-->
 <div class="modal fade show" id="ValidationModal" tabindex="-1" aria-labelledby="ValidationModalLabel" style="display: @showValidation;" aria-modal="true" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -59,6 +59,8 @@
     </div>
 </div>
 
+
+
 <div class="row">
     <div class="top-row c mt-2 mb-2">
         <h4>
@@ -66,9 +68,9 @@
         </h4>
     </div>
     <article class="content col col-4 c mr">
-        @if (MetasList == null || MetasList.Count() == 0)
+        @if (MetasList.Count() == 0)
         {
-            <strong>Loading...</strong>
+            <strong>No se han creado tareas...</strong>
         }
         else
         {
@@ -76,7 +78,7 @@
             <ul>
                 @foreach (var item in MetasList)
                 {
-                    <li class="mb-4">
+                    <li class="mb-4" @onclick="((args)=>GetTareasByMetaID(args,item.PkMeta))">
                         <div class="row">
                             <div class="col col-5">@item.Nombre</div>
                             <div class="col col-7">
@@ -106,35 +108,12 @@
 
     </article>
 </div>
-
-<script>
-    // Example starter JavaScript for disabling form submissions if there are invalid fields
-    (function () {
-        'use strict'
-
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
-        var forms = document.querySelectorAll('.needs-validation')
-
-        // Loop over them and prevent submission
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-
-                    form.classList.add('was-validated')
-                }, false)
-            })
-    })()
-</script>
 @code {
     private List<Meta>? MetasList;
     private Meta meta = new Meta();
     private string action = "";
     private string showValidation = "none";
-     private string validationMessage = "";
+    private string validationMessage = "";
 
     protected override void OnInitialized()
     {
@@ -192,6 +171,11 @@
     {
         MetaService.DeleteMeta(id);
         LoadMetas();
+    }
+
+    private void GetTareasByMetaID(EventArgs eventArgs,int idMeta)
+    {
+        
     }
 
 }
